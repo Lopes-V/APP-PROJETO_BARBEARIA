@@ -1,8 +1,12 @@
-import { Scissors, Clock, User, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AppRoutes } from './routes/AppRoutes';
 
-export function App() {
-  
-  return{
-    
-  }  
+export default function App() {
+  return (
+    <div>
+      <header className='bg-gray-100 flex justify-center text-black'>
+        
+      </header>
+      <AppRoutes/>
+    </div>
+  );
 }
