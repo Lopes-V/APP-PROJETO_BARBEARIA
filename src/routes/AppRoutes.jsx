@@ -3,10 +3,15 @@ import Login from "../pages/pagEntrada/Login";
 import { DefaultLayout } from "../components/DefaultLayout";
 import Signup from "../pages/pagEntrada/Signup";
 import { PrivateRoute } from "./PrivateRoutes";
-import Home from "../pages/home";
-export function AppRoutes() {
-  const estaAutenticado = !!localStorage.getItem("token");
+import { AdminRoute } from "./AdminRoute";
+import Home from "../pages/private/Home";
+import Agenda from "../pages/private/Agenda";
+import Perfil from "../pages/private/Perfil";
+import Financeiro from "../pages/private/Financeiro";
+import Estoque from "../pages/private/Estoque";
+import Barbeiros from "../pages/private/Barbeiros";
 
+export function AppRoutes() {
   return (
     <Routes>
       {/* ROTAS VAZIAS PADRONIZACAO */}
@@ -17,7 +22,7 @@ export function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* ROTAS PRIVADAS*/}
+      {/* ROTAS PRIVADAS */}
       <Route
         element={
           <PrivateRoute>
@@ -25,9 +30,36 @@ export function AppRoutes() {
           </PrivateRoute>
         }
       >
-        <Route path="/financeiro" element={<PrivateRoute roleRequired="ADMIN"></PrivateRoute>} />
-        <Route path="/estoque" element={<PrivateRoute roleRequired="ADMIN"></PrivateRoute>} />
+        {/* Acesso geral (usuário autenticado) */}
         <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+        <Route path="/agenda" element={<PrivateRoute><Agenda /></PrivateRoute>} />
+        <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
+
+        {/* Acesso exclusivo ADMIN */}
+        <Route
+          path="/financeiro"
+          element={
+            <AdminRoute>
+              <Financeiro />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/estoque"
+          element={
+            <AdminRoute>
+              <Estoque />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/barbeiros"
+          element={
+            <AdminRoute>
+              <Barbeiros />
+            </AdminRoute>
+          }
+        />
       </Route>
     </Routes>
   );

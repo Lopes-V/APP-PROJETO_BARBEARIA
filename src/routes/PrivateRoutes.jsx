@@ -2,13 +2,10 @@ import { Navigate } from "react-router-dom";
 
 export function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem('role');
 
   if (!token) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
-  if (roleRequired && userRole !== roleRequired) {
-    return <Navigate to="/home" />;
-  } 
+
   return children;
 }

@@ -4,7 +4,7 @@ export const agendamentoService = {
   getAll: async () => {
     try {
       const response = await api.get(`/agendamentos`);
-      if (response.data.success) throw new Error(response.data.message);
+      if (!response.data.success) throw new Error(response.data.message);
       if (!response.data.data || response.data.data.length === 0) {
         throw new Error("Nenhum agendamento existente");
       }

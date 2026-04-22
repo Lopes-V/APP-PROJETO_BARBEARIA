@@ -19,8 +19,11 @@ export default function Login() {
     setLoading(true);
     try {
       const dados = { "login": usuario, "senha": senha };
-      await loginService.logar(dados);
+      const response = await loginService.logar(dados);
       setLoading(false)
+      localStorage.setItem("token", response.data.token)
+      localStorage.setItem("role",response.data.usuario.role)
+      localStorage.setItem("usuario",response.data.usuario.login)
       navigate("/home")
     } catch (err) {
       console.error(err);

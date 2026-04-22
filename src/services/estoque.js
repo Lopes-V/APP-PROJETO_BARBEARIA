@@ -1,20 +1,18 @@
 import api from "./api";
 
-export const getEstoque = {
+export const estoqueService = {
   getAll: async () => {
     try {
       const response = await api.get("/estoque");
       if (!response.data.success) throw new Error(response.data.message);
-      if (!response.data.data || response.data.data.length == 0) {
-        throw new Error("Nenhum estoque existente");
-      }
+      return response.data.data || [];
     } catch (error) {
       console.error(error.message);
       throw error;
     }
   },
 
-  update: async (dados) => {
+  create: async (dados) => {
     try {
       const response = await api.post(`/estoque`, dados);
       if (!response.data.success) throw new Error(response.data.message);
@@ -24,9 +22,10 @@ export const getEstoque = {
       throw error;
     }
   },
-  movimentation: async (id, dados) => {
+
+  movimentation: async (id, quantidade) => {
     try {
-      const response = await api.patch(`/estoque/${id}/movimentacao`, dados);
+      const response = await api.patch(`/estoque/${id}/movimentacao`, { id, quantidade });
       if (!response.data.success) throw new Error(response.data.message);
       return response.data.data;
     } catch (error) {
@@ -34,14 +33,12 @@ export const getEstoque = {
       throw error;
     }
   },
+
   alert: async () => {
     try {
       const response = await api.get(`/estoque/alerta`);
       if (!response.data.success) throw new Error(response.data.message);
-      if (!response.data.data || response.data.data.length == 0) {
-        throw new Error("Nenhum alerta encontrado");
-      }
-      return response.data.data;
+      return response.data.data || [];
     } catch (error) {
       console.error(error.message);
       throw error;
