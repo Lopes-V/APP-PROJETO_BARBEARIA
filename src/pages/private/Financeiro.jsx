@@ -18,14 +18,13 @@ const MESES = [
 ];
 
 const TIPOS_LANCAMENTO = ["RECEITA", "DESPESA"];
-
 const STATUS_LANCAMENTO = ["PENDENTE", "PAGO", "CANCELADO"];
 
 const FORMAS_PAGAMENTO = [
-  { value: "DINHEIRO",        label: "💵 Dinheiro" },
-  { value: "PIX",             label: "⚡ Pix" },
-  { value: "CARTAO_CREDITO",  label: "💳 Crédito" },
-  { value: "CARTAO_DEBITO",   label: "💳 Débito" },
+  { value: "DINHEIRO", label: "💵 Dinheiro" },
+  { value: "PIX", label: "⚡ Pix" },
+  { value: "CARTAO_CREDITO", label: "💳 Crédito" },
+  { value: "CARTAO_DEBITO", label: "💳 Débito" },
 ];
 
 function formatBRL(value) {
@@ -38,9 +37,7 @@ function formatBRL(value) {
 
 function StatCard({ icon: Icon, label, value, color, gradient }) {
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col gap-3 shadow-lg`}
-    >
+    <div className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-6 flex flex-col gap-3 shadow-lg">
       <div
         className={`absolute inset-0 opacity-10 ${gradient}`}
         style={{ pointerEvents: "none" }}
@@ -60,20 +57,20 @@ export default function Financeiro() {
   const [mes, setMes] = useState(hoje.getMonth() + 1);
 
   const [lancamentos, setLancamentos] = useState([]);
-  const [balanco, setBalanco] = useState(null);
+  const [balanco, setBalanco] = useState(null); 
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
 
-  // Modal de novo lançamento
   const [modalAberto, setModalAberto] = useState(false);
   const [formData, setFormData] = useState({
     descricao: "",
     valor: "",
     tipoLancamento: "RECEITA",
-    dataLancamento: "",
+    dataLancamento: new Date().toISOString().split("T")[0],
     statusLancamento: "PENDENTE",
     formasPagamento: "DINHEIRO",
   });
+  
   const [salvando, setSalvando] = useState(false);
   const [erroForm, setErroForm] = useState(null);
 
@@ -86,14 +83,14 @@ export default function Financeiro() {
         financeiroService.getBalanco(ano, mes),
       ]);
 
-      setLancamentos(
-        listaRes.status === "fulfilled" ? listaRes.value : []
-      );
-      setBalanco(
-        balancoRes.status === "fulfilled" ? balancoRes.value : null
-      );
+      const listaDados = listaRes.status === "fulfilled" ? listaRes.value : [];
+      setLancamentos(Array.isArray(listaDados) ? listaDados : []);
+      
+      setBalanco(balancoRes.status === "fulfilled" ? balancoRes.value : null);
+      
     } catch {
       setErro("Não foi possível carregar os dados financeiros.");
+      setLancamentos([]);
     } finally {
       setLoading(false);
     }
@@ -104,13 +101,21 @@ export default function Financeiro() {
   }, [carregarDados]);
 
   async function handleMarcarPago(id) {
+    if (!id) {
+      alert("ID do lançamento não encontrado. Verifique o Back-end.");
+      return;
+    }
+    
     try {
       await financeiroService.markWithPayment(id);
       setLancamentos((prev) =>
-        prev.map((l) => (l.id === id ? { ...l, statusLancamento: "PAGO" } : l))
+        prev.map((l) => {
+          const itemId = l.id_financeiro || l.id;
+          return itemId === id ? { ...l, statusLancamento: "PAGO" } : l;
+        })
       );
     } catch {
-      alert("Erro ao marcar lançamento como pago.");
+      console.log("Erro ao marcar lançamento como pago.");
     }
   }
 
@@ -123,17 +128,20 @@ export default function Financeiro() {
         ...formData,
         valor: parseFloat(formData.valor),
       });
-      setLancamentos((prev) => [novo, ...prev]);
+      
+      setLancamentos((prev) => [novo, ...(Array.isArray(prev) ? prev : [])]);
       setModalAberto(false);
+      
       setFormData({
         descricao: "",
         valor: "",
         tipoLancamento: "RECEITA",
-        dataLancamento: "",
+        dataLancamento: new Date().toISOString().split("T")[0],
         statusLancamento: "PENDENTE",
         formasPagamento: "DINHEIRO",
       });
-      carregarDados(); // recarrega balanço
+      
+      carregarDados();
     } catch (err) {
       setErroForm(err.message || "Erro ao criar lançamento.");
     } finally {
@@ -153,7 +161,7 @@ export default function Financeiro() {
   return (
     <div className="min-h-screen bg-zinc-950 px-4 py-10">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
-
+        
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -184,7 +192,9 @@ export default function Financeiro() {
             onChange={(e) => setMes(Number(e.target.value))}
           >
             {MESES.map((m, i) => (
-              <option key={i + 1} value={i + 1}>{m}</option>
+              <option key={i + 1} value={i + 1}>
+                {m}
+              </option>
             ))}
           </select>
 
@@ -194,7 +204,9 @@ export default function Financeiro() {
             onChange={(e) => setAno(Number(e.target.value))}
           >
             {anosDisponiveis.map((a) => (
-              <option key={a} value={a}>{a}</option>
+              <option key={a} value={a}>
+                {a}
+              </option>
             ))}
           </select>
 
@@ -251,8 +263,12 @@ export default function Financeiro() {
         {/* TABELA DE LANÇAMENTOS */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-zinc-100 font-semibold text-lg">Lançamentos do Mês</h2>
-            <span className="text-zinc-500 text-sm">{lancamentos.length} registro(s)</span>
+            <h2 className="text-zinc-100 font-semibold text-lg">
+              Lançamentos do Mês
+            </h2>
+            <span className="text-zinc-500 text-sm">
+              {lancamentos?.length || 0} registro(s)
+            </span>
           </div>
 
           {loading ? (
@@ -260,10 +276,12 @@ export default function Financeiro() {
               <RefreshCw className="w-5 h-5 animate-spin" />
               Carregando...
             </div>
-          ) : lancamentos.length === 0 ? (
+          ) : !lancamentos?.length ? (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-600 gap-2">
               <BarChart3 className="w-10 h-10 opacity-30" />
-              <p className="text-sm">Nenhum lançamento encontrado para este período.</p>
+              <p className="text-sm">
+                Nenhum lançamento encontrado para este período.
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -280,73 +298,82 @@ export default function Financeiro() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800">
-                  {lancamentos.map((l) => (
-                    <tr
-                      key={l.id}
-                      className="hover:bg-zinc-800/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 text-zinc-100 font-medium">
-                        {l.descricao}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                  {lancamentos.map((l, index) => {
+                    const itemId = l.id_financeiro || l.id;
+                    
+                    return (
+                      <tr
+                        key={itemId || `fallback-key-${index}`}
+                        className="hover:bg-zinc-800/50 transition-colors"
+                      >
+                        <td className="px-6 py-4 text-zinc-100 font-medium">
+                          {l.descricao}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                              l.tipoLancamento === "RECEITA"
+                                ? "bg-emerald-900/50 text-emerald-400"
+                                : "bg-red-900/50 text-red-400"
+                            }`}
+                          >
+                            {l.tipoLancamento === "RECEITA" ? (
+                              <TrendingUp className="w-3 h-3" />
+                            ) : (
+                              <TrendingDown className="w-3 h-3" />
+                            )}
+                            {l.tipoLancamento}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-zinc-400 text-xs">
+                          {l.formasPagamento?.replace("_", " ") ?? "—"}
+                        </td>
+                        <td className="px-6 py-4 text-zinc-400">
+                          {l.dataLancamento
+                            ? new Date(
+                                l.dataLancamento + "T00:00:00"
+                              ).toLocaleDateString("pt-BR")
+                            : "—"}
+                        </td>
+                        <td
+                          className={`px-6 py-4 text-right font-bold ${
                             l.tipoLancamento === "RECEITA"
-                              ? "bg-emerald-900/50 text-emerald-400"
-                              : "bg-red-900/50 text-red-400"
+                              ? "text-emerald-400"
+                              : "text-red-400"
                           }`}
                         >
-                          {l.tipoLancamento === "RECEITA" ? (
-                            <TrendingUp className="w-3 h-3" />
+                          {l.tipoLancamento === "DESPESA" ? "- " : "+ "}
+                          {formatBRL(l.valor)}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {l.statusLancamento === "PAGO" ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                              <CheckCircle className="w-4 h-4" /> Pago
+                            </span>
+                          ) : l.statusLancamento === "CANCELADO" ? (
+                            <span className="inline-flex items-center gap-1 text-zinc-500 text-xs font-semibold">
+                              <X className="w-4 h-4" /> Cancelado
+                            </span>
                           ) : (
-                            <TrendingDown className="w-3 h-3" />
+                            <span className="inline-flex items-center gap-1 text-amber-400 text-xs font-semibold">
+                              <Clock className="w-4 h-4" /> Pendente
+                            </span>
                           )}
-                          {l.tipoLancamento}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-zinc-400 text-xs">
-                        {l.formasPagamento?.replace("_", " ") ?? "—"}
-                      </td>
-                      <td className="px-6 py-4 text-zinc-400">
-                        {l.dataLancamento
-                          ? new Date(l.dataLancamento + "T00:00:00").toLocaleDateString("pt-BR")
-                          : "—"}
-                      </td>
-                      <td
-                        className={`px-6 py-4 text-right font-bold ${
-                          l.tipoLancamento === "RECEITA" ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {l.tipoLancamento === "DESPESA" ? "- " : "+ "}
-                        {formatBRL(l.valor)}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {l.statusLancamento === "PAGO" ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-400 text-xs font-semibold">
-                            <CheckCircle className="w-4 h-4" /> Pago
-                          </span>
-                        ) : l.statusLancamento === "CANCELADO" ? (
-                          <span className="inline-flex items-center gap-1 text-zinc-500 text-xs font-semibold">
-                            <X className="w-4 h-4" /> Cancelado
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-amber-400 text-xs font-semibold">
-                            <Clock className="w-4 h-4" /> Pendente
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {l.statusLancamento !== "PAGO" && l.statusLancamento !== "CANCELADO" && (
-                          <button
-                            onClick={() => handleMarcarPago(l.id)}
-                            className="text-xs bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                          >
-                            Marcar pago
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {l.statusLancamento !== "PAGO" &&
+                            l.statusLancamento !== "CANCELADO" && (
+                              <button
+                                onClick={() => handleMarcarPago(itemId)}
+                                className="text-xs bg-emerald-700 hover:bg-emerald-600 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Marcar pago
+                              </button>
+                            )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -354,7 +381,6 @@ export default function Financeiro() {
         </div>
       </div>
 
-      {/* MODAL NOVO LANÇAMENTO */}
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
@@ -375,22 +401,31 @@ export default function Financeiro() {
               </p>
             )}
 
-            <form onSubmit={handleCriarLancamento} className="flex flex-col gap-5">
+            <form
+              onSubmit={handleCriarLancamento}
+              className="flex flex-col gap-5"
+            >
               {/* Descrição */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Descrição</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Descrição
+                </label>
                 <input
                   className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 placeholder-zinc-600"
                   placeholder="Ex: Compra de produtos para barba"
                   value={formData.descricao}
-                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, descricao: e.target.value })
+                  }
                   required
                 />
               </div>
 
               {/* Valor */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Valor (R$)</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Valor (R$)
+                </label>
                 <input
                   type="number"
                   step="0.01"
@@ -398,20 +433,26 @@ export default function Financeiro() {
                   className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 placeholder-zinc-600"
                   placeholder="0,00"
                   value={formData.valor}
-                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, valor: e.target.value })
+                  }
                   required
                 />
               </div>
 
               {/* Tipo Lançamento */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Tipo</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Tipo
+                </label>
                 <div className="flex gap-3">
                   {TIPOS_LANCAMENTO.map((t) => (
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setFormData({ ...formData, tipoLancamento: t })}
+                      onClick={() =>
+                        setFormData({ ...formData, tipoLancamento: t })
+                      }
                       className={`flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all ${
                         formData.tipoLancamento === t
                           ? t === "RECEITA"
@@ -428,46 +469,67 @@ export default function Financeiro() {
 
               {/* Forma de Pagamento */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Forma de Pagamento</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Forma de Pagamento
+                </label>
                 <select
                   className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"
                   value={formData.formasPagamento}
-                  onChange={(e) => setFormData({ ...formData, formasPagamento: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      formasPagamento: e.target.value,
+                    })
+                  }
                   required
                 >
                   {FORMAS_PAGAMENTO.map((f) => (
-                    <option key={f.value} value={f.value}>{f.label}</option>
+                    <option key={f.value} value={f.value}>
+                      {f.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Status */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Status</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Status
+                </label>
                 <select
                   className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"
                   value={formData.statusLancamento}
-                  onChange={(e) => setFormData({ ...formData, statusLancamento: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      statusLancamento: e.target.value,
+                    })
+                  }
                 >
                   {STATUS_LANCAMENTO.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Data do Lançamento */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-sm font-medium">Data do Lançamento</label>
+                <label className="text-zinc-400 text-sm font-medium">
+                  Data do Lançamento
+                </label>
                 <input
                   type="date"
                   className="bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"
                   value={formData.dataLancamento}
-                  onChange={(e) => setFormData({ ...formData, dataLancamento: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dataLancamento: e.target.value })
+                  }
                   required
                 />
               </div>
 
-              {/* Botão */}
               <button
                 type="submit"
                 disabled={salvando}

@@ -6,6 +6,5 @@ export function AdminRoute({ children }) {
 
   if (!token) return <Navigate to="/login" replace />;
   if (userRole !== "ADMIN") return <Navigate to="/home" replace />;
-
   return children;
 }

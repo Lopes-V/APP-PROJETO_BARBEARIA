@@ -22,7 +22,6 @@ export function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
-      {/* ROTAS PRIVADAS */}
       <Route
         element={
           <PrivateRoute>
@@ -31,9 +30,30 @@ export function AppRoutes() {
         }
       >
         {/* Acesso geral (usuário autenticado) */}
-        <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
-        <Route path="/agenda" element={<PrivateRoute><Agenda /></PrivateRoute>} />
-        <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
+        <Route
+          path="/home"
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/agenda"
+          element={
+            <PrivateRoute>
+              <Agenda />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <Perfil />
+            </PrivateRoute>
+          }
+        />
 
         {/* Acesso exclusivo ADMIN */}
         <Route

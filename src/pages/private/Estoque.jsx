@@ -56,9 +56,9 @@ export default function Estoque() {
     setErroNovo(null);
     try {
       const novo = await estoqueService.create({
-        nomeItem: formNovo.nomeItem,
-        quantidadeAtual: Number(formNovo.quantidadeAtual),
-        quantidadeMinima: Number(formNovo.quantidadeMinima),
+        "nomeItem": formNovo.nomeItem,
+        "quantidadeAtual": Number(formNovo.quantidadeAtual),
+        "quantidadeMinima": Number(formNovo.quantidadeMinima),
       });
       setItens((prev) => [novo, ...prev]);
       setModalNovoAberto(false);
