@@ -1,249 +1,249 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { barbeiroService } from "../../services/barbeiro";
+import { servicoService } from "../../services/servico";
+import { Scissors, Star, MapPin, Clock, MessageSquare, User, RefreshCw } from "lucide-react";
 
 export default function BarberHero() {
   const [isHovered, setIsHovered] = useState(false);
+  const [barbeiros, setBarbeiros] = useState([]);
+  const [servicos, setServicos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        const [b, s] = await Promise.all([
+          barbeiroService.getAll(),
+          servicoService.getAll()
+        ]);
+        setBarbeiros(b || []);
+        setServicos(s || []);
+      } catch (err) {
+        console.error("Erro ao carregar dados da home:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    carregarDados();
+  }, []);
+
   const abrirWhats = () => {
     window.open("https://wa.me/+5547996737867", "_blank");
-    return;
   };
+
+  const barberImages = [
+    "https://images.unsplash.com/photo-1503460293376-303bbac90848?auto=format&fit=crop&q=80&w=400&h=400",
+    "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=400&h=400",
+    "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&q=80&w=400&h=400",
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400&h=400",
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <RefreshCw className="w-10 h-10 text-amber-500 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="bg-zinc-950 text-zinc-100 overflow-x-hidden">
+      {/* HERO SECTION */}
       <section
-        className="relative w-full h-screen bg-cover bg-center flex items-center justify-center"
+        className="relative w-full h-screen flex items-center justify-center overflow-hidden"
         style={{
-          backgroundImage: "url(./public/assets/barbearia-hero.jpg)",
+          backgroundImage: "url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=1920')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        {/* Overlay escuro para texto legível */}
-        <div className="absolute inset-0 bg-black/35"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-zinc-950"></div>
 
-        {/* Conteúdo centralizado */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-20 max-w-4xl">
-          {/* Título */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-4 tracking-wide drop-shadow-lg">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 max-w-5xl">
+          <div className="mb-6 inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-full backdrop-blur-sm">
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span className="text-amber-500 text-xs font-bold tracking-widest uppercase">Referência em Estilo & Cuidado</span>
+          </div>
+
+          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white mb-6 tracking-tighter drop-shadow-2xl">
             BARBEARIA
-            <span className="block text-amber-400 drop-shadow-lg">LOPES</span>
+            <span className="block text-amber-500">LOPES</span>
           </h1>
 
-          {/* Descrição */}
-          <p className="text-base sm:text-lg md:text-xl text-gray-100 max-w-2xl mb-8 leading-relaxed drop-shadow-md">
-            Corte clássico, barba terapia e o melhor ambiente da cidade.
-            <br />
-            Venha renovar seu estilo com quem entende do assunto.
+          <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mb-10 leading-relaxed font-medium">
+            Onde a tradição encontra a modernidade. Oferecemos o melhor em corte clássico, barboterapia e um ambiente feito para você.
           </p>
 
-          {/* Botão Agendar */}
           <button
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={() => (window.location.href = "/agenda")}
-            className={`px-6 sm:px-8 py-3 sm:py-4 bg-amber-400 hover:bg-amber-500 text-black font-bold text-base sm:text-lg rounded-sm transition-all duration-300 transform shadow-lg ${
-              isHovered ? "scale-105 shadow-2xl shadow-amber-500/60" : ""
+            className={`group relative px-10 py-5 bg-amber-500 hover:bg-amber-400 text-black font-black text-lg rounded-xl transition-all duration-300 shadow-[0_0_40px_rgba(245,158,11,0.3)] ${
+              isHovered ? "scale-105" : ""
             }`}
           >
-            AGENDAR HORÁRIO
+            AGENDAR EXPERIÊNCIA
           </button>
-
-          {/* Texto adicional */}
-          <p className="text-gray-300 text-xs sm:text-sm mt-6 drop-shadow-md">
-            Clique para marcar seu horário
-          </p>
-        </div>
-      </section>
-
-      {/* SERVIÇOS */}
-      <section className="py-20 px-4 md:px-8 bg-black border-t-2 border-amber-400">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-amber-400">
-            Serviços & Preços
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-8">
-            <div className="border border-amber-400 p-6">
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Corte Social
-              </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Tesoura ou máquina, acabamento perfeito.
-              </p>
-              <p className="text-2xl font-bold text-amber-400">R$ 50,00</p>
-            </div>
-
-            <div className="border border-amber-400 p-6">
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Barba Premium
-              </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Toalha quente, óleo essencial e massagem.
-              </p>
-              <p className="text-2xl font-bold text-amber-400">R$ 40,00</p>
-            </div>
-
-            <div className="border border-amber-400 p-6">
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Combo Completo
-              </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                O pacote completo para o seu visual.
-              </p>
-              <p className="text-2xl font-bold text-amber-400">R$ 80,00</p>
-            </div>
-
-            <div className="border border-amber-400 p-6">
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Pezinho/Acabamento
-              </h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Manutenção rápida entre cortes.
-              </p>
-              <p className="text-2xl font-bold text-amber-400">R$ 20,00</p>
-            </div>
+          
+          <div className="mt-12 flex gap-8 animate-bounce opacity-50">
+            <Clock className="w-5 h-5" />
+            <MapPin className="w-5 h-5" />
           </div>
         </div>
       </section>
 
-      {/* BARBEIROS */}
-      <section className="py-20 px-4 md:px-8 bg-black border-t-2 border-amber-400">
+      {/* SERVIÇOS DINÂMICOS */}
+      <section className="py-32 px-4 md:px-8 bg-zinc-950">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-amber-400">
-            Conheça Nossos Barbeiros
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center group cursor-pointer">
-              <div className="text-8xl mb-4 ">👨‍💼</div>
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                João Silva
-              </h3>
-              <p className="text-amber-400 text-sm">
-                Especialista em Barbas Lenhador
-              </p>
-              <div className="mt-4 h-1 w-12 bg-amber-400 mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black mb-4">Nossos Serviços</h2>
+            <div className="h-1.5 w-24 bg-amber-500 mx-auto rounded-full"></div>
+            <p className="text-zinc-500 mt-6 max-w-xl mx-auto italic">Excelência em cada detalhe, do corte clássico ao cuidado moderno.</p>
+          </div>
 
-            <div className="text-center group cursor-pointer">
-              <div className="text-8xl mb-4">💇‍♂️</div>
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Carlos Santos
-              </h3>
-              <p className="text-amber-400 text-sm">Mestre do Degradê</p>
-              <div className="mt-4 h-1 w-12 bg-amber-400 mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {servicos.length > 0 ? (
+              servicos.map((s, idx) => (
+                <div key={s.id_servico || idx} className="group p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl hover:border-amber-500/50 transition-all duration-500 hover:-translate-y-2">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="p-3 bg-amber-500/10 rounded-2xl group-hover:bg-amber-500 transition-colors">
+                      <Scissors className="w-6 h-6 text-amber-500 group-hover:text-black" />
+                    </div>
+                    <span className="text-3xl font-black text-amber-500">R$ {s.preco}</span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">{s.nome}</h3>
+                  <div className="flex items-center gap-2 text-zinc-500 text-sm">
+                    <Clock className="w-4 h-4" />
+                    <span>Duração: {s.duracaoServico} min</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-full text-center text-zinc-600">Nenhum serviço disponível no momento.</p>
+            )}
+          </div>
+        </div>
+      </section>
 
-            <div className="text-center group cursor-pointer">
-              <div className="text-8xl mb-4">👨‍🎓</div>
-              <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-amber-400 transition">
-                Pedro Costa
-              </h3>
-              <p className="text-amber-400 text-sm">
-                Especialista em Fade & Undercut
-              </p>
-              <div className="mt-4 h-1 w-12 bg-amber-400 mx-auto opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
+      {/* BARBEIROS DINÂMICOS */}
+      <section className="py-32 px-4 md:px-8 bg-zinc-900/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black mb-4">Mestres do Estilo</h2>
+            <div className="h-1.5 w-24 bg-amber-500 mx-auto rounded-full"></div>
+            <p className="text-zinc-500 mt-6 max-w-xl mx-auto">Nossa equipe de especialistas pronta para transformar seu visual.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {barbeiros.filter(b => b.ativo).map((b, idx) => (
+              <div key={b.id_barbeiro || idx} className="group relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800 transition-all duration-500 hover:border-amber-500/30">
+                <div className="aspect-square overflow-hidden relative">
+                  <img 
+                    src={barberImages[idx % barberImages.length]} 
+                    alt={b.nome}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+                </div>
+                
+                <div className="p-6 text-center relative">
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-16 h-16 bg-amber-500 text-black rounded-2xl flex items-center justify-center text-2xl font-black shadow-xl">
+                    {b.nome.charAt(0)}
+                  </div>
+                  <h3 className="text-xl font-bold text-white mt-4">{b.nome}</h3>
+                  <p className="text-amber-500 text-sm font-medium tracking-wide mt-1 uppercase">{b.especialidade}</p>
+                  
+                  <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-center gap-4 text-zinc-500 group-hover:text-amber-500 transition-colors">
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                    <Star className="w-4 h-4 fill-current" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* DEPOIMENTOS */}
-      <section className="py-20 px-4 md:px-8 bg-black border-t-2 border-amber-400">
+      <section className="py-32 px-4 md:px-8 bg-black">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-amber-400">
-            O Que Nossos Clientes Dizem
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-20 text-white italic">A Voz da Comunidade</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="border border-amber-400 p-8">
-              <div className="flex gap-1 mb-4">
-                <span className="text-amber-400">★★★★★</span>
+            {[
+              { name: "Ricardo S.", text: "Melhor atendimento da região. A barboterapia é de outro mundo!" },
+              { name: "Anderson T.", text: "Profissionalismo e qualidade impecável. Já sou cliente a 3 anos!" },
+              { name: "Felipe M.", text: "Volta e meia estou lá. Corte perfeito, preço justo." }
+            ].map((d, i) => (
+              <div key={i} className="p-10 bg-zinc-900/40 border-l-4 border-amber-500 rounded-r-3xl">
+                <div className="flex gap-1 mb-6 text-amber-500">
+                  <Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" />
+                </div>
+                <p className="text-zinc-300 mb-8 text-lg leading-relaxed italic">"{d.text}"</p>
+                <p className="text-amber-500 font-black tracking-widest">— {d.name}</p>
               </div>
-              <p className="text-gray-300 mb-6 italic">
-                "Melhor atendimento da região. A barboterapia é de outro mundo!"
-              </p>
-              <p className="text-amber-400 font-bold">— Ricardo S.</p>
-            </div>
-
-            <div className="border border-amber-400 p-8">
-              <div className="flex gap-1 mb-4">
-                <span className="text-amber-400">★★★★★</span>
-              </div>
-              <p className="text-gray-300 mb-6 italic">
-                "Profissionalismo e qualidade impecável. Já sou cliente a 3
-                anos!"
-              </p>
-              <p className="text-amber-400 font-bold">— Anderson T.</p>
-            </div>
-
-            <div className="border border-amber-400 p-8">
-              <div className="flex gap-1 mb-4">
-                <span className="text-amber-400">★★★★★</span>
-              </div>
-              <p className="text-gray-300 mb-6 italic">
-                "Volta e meia estou lá. Corte perfeito, preço justo."
-              </p>
-              <p className="text-amber-400 font-bold">— Felipe M.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* LOCALIZAÇÃO E HORÁRIO */}
-      <section className="py-20 px-4 md:px-8 bg-black border-t-2 border-amber-400">
+      <section className="py-32 px-4 md:px-8 bg-zinc-950 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px]"></div>
+        
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-amber-400">
-            Visite-nos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Mapa */}
-            <div className="border-2 border-amber-400 overflow-hidden h-96">
-              <iframe
-                className="w-full h-full"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3579.1234567890!2d-48.8801234!3d-26.3044722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94dfe37e0000!2sBarbearia+Lopes!5e0!3m2!1spt-BR!2sbr!4v1234567890"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-              ></iframe>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-amber-500/20 rounded-[40px] blur-2xl group-hover:bg-amber-500/30 transition-all duration-500"></div>
+              <div className="relative rounded-[32px] overflow-hidden border-2 border-amber-500/30 h-[500px]">
+                <iframe
+                  className="w-full h-full grayscale hover:grayscale-0 transition-all duration-1000"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3579.1234567890!2d-48.8801234!3d-26.3044722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94dfe37e0000!2sBarbearia+Lopes!5e0!3m2!1spt-BR!2sbr!4v1234567890"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                ></iframe>
+              </div>
             </div>
 
-            {/* Info */}
-            <div className="flex flex-col justify-center gap-8">
-              {/* Endereço */}
-              <div className="border-l-4 border-amber-400 pl-6">
-                <h3 className="text-xl font-bold text-white mb-2">
-                  📍 Endereço
-                </h3>
-                <p className="text-gray-400">Rua das Tesouras, 123 - Centro</p>
-              </div>
-
-              {/* Horários */}
-              <div className="border-l-4 border-amber-400 pl-6">
-                <h3 className="text-xl font-bold text-white mb-4">
-                  🕐 Horários
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-gray-400">
-                    <span>Segunda a Sexta</span>
-                    <span className="font-bold text-amber-400">
-                      09:00 às 20:00
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>Sábado</span>
-                    <span className="font-bold text-amber-400">
-                      08:00 às 18:00
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>Domingo</span>
-                    <span className="font-bold text-amber-400">Fechado</span>
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <h2 className="text-5xl font-black text-white">Estamos <br/><span className="text-amber-500 underline decoration-4 underline-offset-8">Prontos</span> para te Receber</h2>
+                <div className="flex items-start gap-4 p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800 hover:border-amber-500/30 transition-all">
+                  <MapPin className="w-8 h-8 text-amber-500 shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-lg text-white">Onde Estamos</h3>
+                    <p className="text-zinc-500">Rua das Tesouras, 123 - Centro, Joinville - SC</p>
                   </div>
                 </div>
               </div>
 
-              {/* WhatsApp */}
+              <div className="p-8 bg-zinc-900 rounded-3xl border border-zinc-800 shadow-2xl">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                  <Clock className="w-6 h-6 text-amber-500" /> Horários de Atendimento
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    { days: "Segunda a Sexta", hours: "09:00 às 20:00" },
+                    { days: "Sábado", hours: "08:00 às 18:00" },
+                    { days: "Domingo", hours: "Fechado", color: "text-red-500" }
+                  ].map((h, i) => (
+                    <div key={i} className="flex justify-between items-center py-3 border-b border-zinc-800 last:border-0">
+                      <span className="text-zinc-400 font-medium">{h.days}</span>
+                      <span className={`font-black ${h.color || "text-amber-500"}`}>{h.hours}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={abrirWhats}
-                className="mt-4 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-sm transition-all duration-300 w-full"
+                className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-emerald-900/20 group"
               >
-                💬 Chamar no WhatsApp
+                <MessageSquare className="w-6 h-6 group-hover:scale-125 transition-transform" />
+                CONVERSAR NO WHATSAPP
               </button>
             </div>
           </div>
