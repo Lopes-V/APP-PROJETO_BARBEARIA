@@ -71,9 +71,16 @@ export function DefaultLayout() {
 
                   <Link
                     to="/barbeiros"
-                    className="flex items-center gap-2 text-zinc-100 hover:text-amber-500 transition-colors"
+                    className="flex items-center gap-2 text-amber-500 font-bold hover:text-amber-400 transition-colors"
                   >
                     <Users2 className="w-4 h-4" /> Equipe
+                  </Link>
+
+                  <Link
+                    to="/servicos"
+                    className="flex items-center gap-2 text-amber-500 font-bold hover:text-amber-400 transition-colors"
+                  >
+                    <Scissors className="w-4 h-4" /> Serviços
                   </Link>
                 </div>
               )}

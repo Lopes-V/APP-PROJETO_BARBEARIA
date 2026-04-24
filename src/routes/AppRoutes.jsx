@@ -10,6 +10,7 @@ import Perfil from "../pages/private/Perfil";
 import Financeiro from "../pages/private/Financeiro";
 import Estoque from "../pages/private/Estoque";
 import Barbeiros from "../pages/private/Barbeiros";
+import Servicos from "../pages/private/Servicos";
 
 export function AppRoutes() {
   return (
@@ -77,6 +78,14 @@ export function AppRoutes() {
           element={
             <AdminRoute>
               <Barbeiros />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/servicos"
+          element={
+            <AdminRoute>
+              <Servicos />
             </AdminRoute>
           }
         />

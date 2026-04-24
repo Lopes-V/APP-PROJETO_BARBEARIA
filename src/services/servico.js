@@ -1,4 +1,3 @@
-import { X } from "lucide-react";
 import api from "./api";
 
 export const servicoService = {
@@ -30,6 +29,17 @@ export const servicoService = {
   create: async (dados) => {
     try {
       const response = await api.post(`/servicos`, dados);
+      if (!response.data.success) throw new Error(response.data.message);
+      return response.data.data;
+    } catch (error) {
+      console.error(error.message);
+      throw error;
+    }
+  },
+
+  update: async (id, dados) => {
+    try {
+      const response = await api.put(`/servicos/${id}`, dados);
       if (!response.data.success) throw new Error(response.data.message);
       return response.data.data;
     } catch (error) {
