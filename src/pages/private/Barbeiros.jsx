@@ -39,7 +39,7 @@ export default function Barbeiros() {
 
   function abrirModal(barbeiro = null) {
     if (barbeiro) {
-      setEditandoId(barbeiro.id);
+      setEditandoId(barbeiro.id_barbeiro);
       setFormData({
         nome: barbeiro.nome,
         especialidade: barbeiro.especialidade,
@@ -76,10 +76,10 @@ export default function Barbeiros() {
     }
   }
 
-  async function handleDeletar(id) {
+  async function handleDeletar(id_barbeiro) {
     if (!window.confirm("Tem certeza que deseja remover este barbeiro?")) return;
     try {
-      await barbeiroService.delete(id);
+      await barbeiroService.delete(id_barbeiro);
       carregarDados();
     } catch (err) {
       alert("Erro ao excluir barbeiro: " + err.message);
@@ -129,12 +129,12 @@ export default function Barbeiros() {
             </div>
           ) : (
             barbeiros.map(b => (
-              <div key={b.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative group overflow-hidden">
+              <div key={b.id_barbeiro} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative group overflow-hidden">
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => abrirModal(b)} className="text-zinc-400 hover:text-amber-400 bg-zinc-800 p-2 rounded-lg">
                     <Edit className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDeletar(b.id)} className="text-zinc-400 hover:text-red-400 bg-zinc-800 p-2 rounded-lg">
+                  <button onClick={() => handleDeletar(b.id_barbeiro)} className="text-zinc-400 hover:text-red-400 bg-zinc-800 p-2 rounded-lg">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>

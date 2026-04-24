@@ -48,9 +48,9 @@ export const barbeiroService = {
     }
   },
 
-  delete: async (id) => {
+  delete: async (id_barbeiro) => {
     try {
-      const response = await api.delete(`/barbeiro/${id}`);
+      const response = await api.delete(`/barbeiro/${id_barbeiro}`);
       if (!response.data.success) throw new Error(response.data.message);
       return true;
     } catch (error) {
